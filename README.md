@@ -23,11 +23,10 @@ For this:
 For Airflow the pretty popular repository [docker-airflow by puckel](https://github.com/puckel/docker-airflow) is used.
 This repository is referenced as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) located under `/submodules/docker-airflow`.
 
-**If you initially cloned this repo, run** `git submodule init` **so that the airflow repo is also cloned into your local setup.
-
 See more information there on e.g. additional configuration possibilities etc.
 
 To summarize:
+1. If you **initially cloned this repo**, run `git submodule init` so that the airflow repo is also cloned into your local setup
 1. Get the image using `docker pull puckel/docker-airflow`
 1. Build the container with your desired configuration (for additional packages see [here](https://airflow.apache.org/docs/stable/installation.html#extra-package)):     `docker build --rm --build-arg AIRFLOW_DEPS="datadog,dask,all_dbs" --build-arg PYTHON_DEPS="flask_oauthlib>=0.9" -t puckel/docker-airflow .`
 1. Start the containers using the **LocalExecutor** with `docker-compose -f docker-compose-LocalExecutor.yml up -d`
