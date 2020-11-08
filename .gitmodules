@@ -1,0 +1,4 @@
+[submodule "submodules/docker-airflow"]
+	path = submodules/docker-airflow
+	url = https://github.com/puckel/docker-airflow
+	
