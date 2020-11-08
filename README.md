@@ -18,3 +18,11 @@ If everything worked, your Airflow should be ready under `http://localhost:8080/
 For Airflow the pretty popular repository [docker-airflow by puckel](https://github.com/puckel/docker-airflow) is used.
 See more information there on e.g. additional configuration possibilities etc.
 This repository is referenced as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) located under `/submodules/docker-airflow`.
+
+## Adding your own DAGs
+Per default, Airflow will scan the configured DAG-folder `/submodules/docker-airflow/dags` periodically. You can configure the filecheck interval in the `/submodules/docker-airflow/config/airflow.cfg` parameter `dag_dir_list_interval`.
+
+Meaning, if you add your own DAG python files there, after some time they will magically appear in your running Airflow instance. You don't even have to rebuild or restart your Docker container.
+
+I added for convenience the folder `/dags`. Put your own DAGs in there, code and if you want to push them to your airflow instance, call the shell script `push_dags.sh`.
+This will copy the content of the `/dags` folder to `/submodules/docker-airflow/dags` and then your DAGs will appear in your airflow instance.

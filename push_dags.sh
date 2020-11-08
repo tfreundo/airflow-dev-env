@@ -1,0 +1,1 @@
+cp -r ./dags/* ./submodules/docker-airflow/dags
