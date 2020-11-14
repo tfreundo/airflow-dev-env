@@ -26,3 +26,6 @@ Meaning, if you add your own DAG python files there, after some time they will m
 
 I added for convenience the folder `/dags`. Put your own DAGs in there, code and if you want to push them to your airflow instance, call the shell script `push_dags.sh`.
 This will copy the content of the `/dags` folder to `/submodules/docker-airflow/dags` and then your DAGs will appear in your airflow instance.
+
+## Troubleshooting
+For known issues and their solutions see [Troubleshooting.md](Troubleshooting.md)
