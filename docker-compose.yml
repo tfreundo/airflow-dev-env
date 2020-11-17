@@ -14,6 +14,10 @@ services:
     webserver:
         container_name: "airflow_webserver"
         image: puckel/docker-airflow:1.10.9
+        build:
+            context: https://github.com/puckel/docker-airflow.git
+            args:
+                AIRFLOW_DEPS: "all_dbs"
         restart: always
         depends_on:
             - postgres
