@@ -1,5 +1,5 @@
-# etl_sandbox
-A simple playground you can use to quickly try out ETL pipeline use cases and you can even use it as a development environment.
+# datapipe-sandbox
+A sandbox where you can easily try out ETL pipeline use cases and use it as a ready-to-go development environment for data projects.
 
 ## How to set it up
 Simply run `docker-compose up -d` and you're up and running.
