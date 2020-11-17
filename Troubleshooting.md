@@ -13,7 +13,6 @@ Insert
 
 into the following files:
 * `/db/Dockerfile`
-* `/submodules/docker-airflow/Dockerfile`
 
 ## Docker Compose failed to build - Filesharing has been cancelled
 Problem: An error like `ERROR: for docker-airflow_webserver_1  Cannot create container for service webserver: status code not OK but 500`
