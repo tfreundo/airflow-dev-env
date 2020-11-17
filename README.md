@@ -1,4 +1,4 @@
-# simple_etl_playground
+# etl_sandbox
 A simple playground you can use to quickly try out ETL pipeline use cases and you can even use it as a development environment.
 
 ## How to set it up
