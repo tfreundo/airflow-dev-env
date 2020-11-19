@@ -1,15 +1,16 @@
 import airflow
 from airflow.operators.bash_operator import BashOperator
 from airflow.models import DAG
-from datetime import datetime, timedelta
+from airflow.utils.dates import days_ago
+
 args = {
-    'owner': 'Yourself',
-    'start_date': datetime(2018, 12, 2, 16, 40, 0),
-    'email': ['Yourself@mail.tech'],
+    'owner': 'tfreundo',
+    'start_date': days_ago(1),
+    'email': [''],
     'email_on_failure': False,
     'email_on_retry': False
 }
-dag = DAG(dag_id='example_dag', default_args=args, schedule_interval='@daily', concurrency=1, max_active_runs=1,
+dag = DAG(dag_id='example_dag', default_args=args, schedule_interval=None, concurrency=1, max_active_runs=1,
           catchup=False)
 task_1 = BashOperator(
     task_id='task_1',
