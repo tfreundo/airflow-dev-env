@@ -6,12 +6,12 @@ Alternatively, you can add the proxy settings explicitly:
 
 Insert
 
-    HTTP_PROXY http://your-proxy.com:8080
-    HTTPS_PROXY http://your-proxy.com:8080
-    http_proxy http://your-proxy.com:8080
-    https_proxy http://your-proxy.com:8080
+    ENV HTTP_PROXY http://your-proxy.com:8080
+    ENV HTTPS_PROXY http://your-proxy.com:8080
+    ENV http_proxy http://your-proxy.com:8080
+    ENV https_proxy http://your-proxy.com:8080
 
-into the Dockerfiles located under [docker](/docker) and into the [.env file](/.env).
+into the Dockerfiles located under [docker](/docker) and into the [.env file](/.env) (without the ENV part and an `=` sign in between).
 
 ## Docker Compose failed to build - Filesharing has been cancelled
 Problem: An error like `ERROR: for docker-airflow_webserver_1  Cannot create container for service webserver: status code not OK but 500`
