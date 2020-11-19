@@ -39,8 +39,8 @@ services:
             - ./scripts/airflow_webserver:/opt/airflow/scripts
         ports:
             - "8080:8080"
-    mongodb:
-        container_name: "mongodb"
+    mongo:
+        container_name: "mongo"
         build: ./docker/db
         env_file:
             - .env
