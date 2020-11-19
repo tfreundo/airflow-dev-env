@@ -1,47 +1,49 @@
-version: '3.7'
+version: '3.8'
 services:
     postgres:
         container_name: "airflow_postgres"
         image: postgres:9.6
-        environment:
-            - POSTGRES_USER=airflow
-            - POSTGRES_PASSWORD=airflow
-            - POSTGRES_DB=airflow
-        logging:
-            options:
-                max-size: 10m
-                max-file: "3"
+        env_file:
+            - .env
+    scheduler:
+        container_name: "airflow_scheduler"
+        build:
+            context: ./docker/airflow
+        image: apache/airflow_custom:latest
+        command: scheduler
+        restart: on-failure
+        depends_on:
+            - postgres
+        env_file:
+            - .env
+        volumes:
+            - ./airflow/dags:/opt/airflow/dags
+            - ./airflow/plugins:/opt/airflow/plugins
+            - ./airflow/logs:/opt/airflow/logs
     webserver:
         container_name: "airflow_webserver"
-        image: puckel/docker-airflow:1.10.9
         build:
-            context: https://github.com/puckel/docker-airflow.git
-            args:
-                AIRFLOW_DEPS: "all_dbs"
+            context: ./docker/airflow
+        image: apache/airflow_custom:latest
+        entrypoint: ./scripts/entrypoint.sh
         restart: always
         depends_on:
             - postgres
-        environment:
-            - LOAD_EX=n
-            - EXECUTOR=Local
-        logging:
-            options:
-                max-size: 10m
-                max-file: "3"
+            - scheduler
+        env_file:
+            - .env
         volumes:
-            - ./airflow/dags:/usr/local/airflow/dags
-            - ./airflow/plugins:/usr/local/airflow/plugins
+            - ./airflow/dags:/opt/airflow/dags
+            - ./airflow/plugins:/opt/airflow/plugins
+            - ./airflow/logs:/opt/airflow/logs
+            - ./scripts/airflow_webserver:/opt/airflow/scripts
         ports:
             - "8080:8080"
-        command: webserver
-        healthcheck:
-            test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
-            interval: 30s
-            timeout: 30s
-            retries: 3
     mongodb:
         container_name: "mongodb"
-        build: ./db
+        build: ./docker/db
+        env_file:
+            - .env
         restart: always
         ports:
             - "27017:27017"
