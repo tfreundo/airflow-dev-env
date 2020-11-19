@@ -1,0 +1,2 @@
+# Download https://github.com/airflow-plugins/mongo_plugin/blob/master/hooks/mongo_hook.py and add it to local hooks
+curl https://raw.githubusercontent.com/airflow-plugins/mongo_plugin/master/hooks/mongo_hook.py --output ../airflow/plugins/hooks/mongo_hook.py
