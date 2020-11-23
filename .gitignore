@@ -2,4 +2,3 @@
 .vscode
 __pycache__
 /airflow/logs/*
-/airflow/plugins/hooks/mongo_hook.py
