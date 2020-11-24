@@ -25,6 +25,8 @@ class MongoDbExtractAndLoadOperator(BaseOperator):
     :type mongo_sink_database:          string
     :param log_result:                  Whether the first 1000 characters of the query result should be logged or not (default False).
     :type log_result:                   bool
+    :param transform_func:              An optional function that should be used for transforming each entry before loading into the sink.
+    :type transform_func:               function
     """
 
     # Allow templating for those fields
@@ -39,6 +41,7 @@ class MongoDbExtractAndLoadOperator(BaseOperator):
                  mongo_sink_collection,
                  mongo_sink_database,
                  log_result=False,
+                 transform_func=None,
                  *args, **kwargs):
         super(MongoDbExtractAndLoadOperator, self).__init__(*args, **kwargs)
         self.mongo_source_conn_id = mongo_source_conn_id
@@ -49,6 +52,7 @@ class MongoDbExtractAndLoadOperator(BaseOperator):
         self.mongo_sink_collection = mongo_sink_collection
         self.mongo_sink_database = mongo_sink_database
         self.log_result = log_result
+        self.transform_func = transform_func
         # Amount of characters to log
         self.log_result_len = 2000
         # KWARGS
@@ -69,6 +73,12 @@ class MongoDbExtractAndLoadOperator(BaseOperator):
             counter+=1
             # Remove internal id 
             del doc["_id"]
+            if not(self.transform_func is None):
+                # Transform the data according to the given transform_func before loading into the sink
+                try:
+                    doc = self.transform_func(doc)
+                except:
+                    logging.warn("Could not transform document:\n{}".format(doc))
             mongoclient_sink[self.mongo_sink_database][self.mongo_sink_collection].insert_one(
                 doc)
         logging.info("Copied {} documents from source to sink".format(counter))

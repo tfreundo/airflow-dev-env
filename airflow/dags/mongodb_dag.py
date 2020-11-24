@@ -22,7 +22,6 @@ t_extract_and_load_data = MongoDbExtractAndLoadOperator(
     mongo_sink_conn_id="mongo_default",
     mongo_sink_collection="zips",
     mongo_sink_database="analytics",
-    mongo_database="test",
     # Activated for debugging
     log_result=True,
     dag=dag
