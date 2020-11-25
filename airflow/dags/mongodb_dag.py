@@ -1,5 +1,5 @@
 import airflow
-from operators.mongodb_operators import MongoDbExtractAndLoadOperator
+from operators.mongodb_operators import MongoDbETLOperator
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
 
@@ -13,7 +13,7 @@ args = {
 dag = DAG(dag_id='mongodb_extract_and_load_dag', default_args=args, schedule_interval=None, concurrency=1, max_active_runs=1,
           catchup=False)
 
-t_extract_and_load_data = MongoDbExtractAndLoadOperator(
+t_extract_and_load_data = MongoDbETLOperator(
     task_id='mongo_extract_and_load',
     mongo_source_conn_id="mongo_default",
     mongo_source_collection="zips",

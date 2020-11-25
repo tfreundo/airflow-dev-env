@@ -6,9 +6,9 @@ from hooks.mongodb_hook import MongoDbHook
 
 # See as reference: https://github.com/airflow-plugins/mongo_plugin/blob/master/operators/mongo_to_s3_operator.py
 
-class MongoDbExtractAndLoadOperator(BaseOperator):
+class MongoDbETLOperator(BaseOperator):
     """
-    MongoDbExtractAndLoadOperator
+    MongoDbETLOperator
     :param mongo_source_conn_id:        The connection id of source.
     :type mongo_source_conn_id:         string
     :param mongo_source_collection:     The collection of the source.
@@ -43,7 +43,7 @@ class MongoDbExtractAndLoadOperator(BaseOperator):
                  log_result=False,
                  transform_func=None,
                  *args, **kwargs):
-        super(MongoDbExtractAndLoadOperator, self).__init__(*args, **kwargs)
+        super(MongoDbETLOperator, self).__init__(*args, **kwargs)
         self.mongo_source_conn_id = mongo_source_conn_id
         self.mongo_source_collection = mongo_source_collection
         self.mongo_source_database = mongo_source_database
