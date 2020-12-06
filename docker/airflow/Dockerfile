@@ -9,4 +9,5 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 USER airflow
-RUN pip install --no-cache-dir --user "apache-airflow[all_dbs]"
+# TODO Update this via CLI
+# RUN pip install --no-cache-dir --user "apache-airflow[all_dbs]"
