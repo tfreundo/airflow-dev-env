@@ -38,6 +38,10 @@ To install [Airflow Extra Packages](http://apache-airflow-docs.s3-website.eu-cen
 * Use the [Manage CLI](./scripts/cli/manage.py)
 * Add the packages directly in the [Airflow Dockerfile](./docker/airflow/Dockerfile)
 
+The [Manage CLI](./scripts/cli/manage.py) has a list of checkboxes, with all available [Airflow Extra Packages](https://airflow.apache.org/docs/apache-airflow/stable/installation.html#extra-packages). You can simple check them, and they will be correctly written into your [Airflow Dockerfile](./docker/airflow/Dockerfile).
+
+![managepy_airflow_extrapackages.png](./images/managepy_airflow_extrapackages.png)
+
 ### Including airflow-dev-env Extensions
 For convenience, there are additional extensions that you can integrate into this development environment.
 

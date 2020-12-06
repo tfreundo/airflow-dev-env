@@ -10,4 +10,4 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 USER airflow
 # Here you can manage your Airflow Extra Packages (e.g. "all_dbs")
-# RUN pip install --no-cache-dir --user "apache-airflow[all_dbs]"
+# RUN pip install --no-cache-dir --user "apache-airflow[]"
