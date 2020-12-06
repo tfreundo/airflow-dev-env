@@ -29,7 +29,6 @@ services:
         restart: always
         depends_on:
             - postgres
-            - scheduler
         env_file:
             - .env
         volumes:
