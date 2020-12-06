@@ -1,4 +1,4 @@
-FROM apache/airflow:1.10.12
+FROM apache/airflow:1.10.13-python3.8
 USER root
 RUN apt-get update \
     && apt-get install -y build-essential \ 
@@ -9,4 +9,5 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 USER airflow
-RUN pip install --no-cache-dir --user "apache-airflow[all_dbs]"
+# Here you can manage your Airflow Extra Packages (e.g. "all_dbs")
+# RUN pip install --no-cache-dir --user "apache-airflow[]"
