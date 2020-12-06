@@ -11,7 +11,7 @@ services:
             context: ./docker/airflow
         image: apache/airflow_custom:latest
         command: scheduler
-        restart: on-failure
+        restart: always
         depends_on:
             - postgres
         env_file:
