@@ -5,6 +5,14 @@ Your extensible development environment for data projects with [Apache Airflow](
 * Easily extensible
 * Convenient development
 
+**Alternatives** to this approach:
+* Use Airflow natively via pip (not really an option on Windows)
+* Use Airflow natively via WSL (works ok but not really convenient in my opinion)
+
+**Advantages of this solution**:
+* Having a local environment that is way closer to an actual production deployment
+* Great development experience as DAGs and Plugins are directly mounted to the Airflow Docker Container. Develop on the host with your preferred IDE and directly see the results in your Docker environment
+
 ## How to set it up
 Simply run `docker-compose up -d` and you're up and running.
 If everything worked, your Airflow should be ready under `http://localhost:8080/`. You can further evaluate that everything works as expected, by executing the `example_dag`.
