@@ -8,8 +8,9 @@ CHOICE_EXTENSION_STARTCONTAINER = "3. Start the Container"
 CHOICE_BACKTO_MAINMENU = "Back to Main Menu"
 CHOICE_MAINMENU_MANAGEEXTENSIONS = "Manage airflow-dev-env Extension"
 CHOICE_MAINMENU_MANAGEAIRFLOWEXTRAS = "Manage Airflow Extra Packages"
+CHOICE_MAINMENU_WATCHDOG = "Watchdog"
 CHOICE_MAINMENU_EXIT = "Exit"
-
+CHOICE_WATCHDOG_TRIGGERONCE = "Trigger a sync once"
 
 # Extensions
 EXTENSION_MONGODB_NAME = "MongoDB"
