@@ -1,5 +1,5 @@
 """
-Configs and constants used by manage.py
+Configs and constants used by manage_cli.py
 """
 # User choices via CLI
 CHOICE_EXTENSION_GETREPO = "1. Get the Repository"
