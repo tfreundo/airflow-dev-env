@@ -99,21 +99,45 @@ class AirflowWatchdog:
 
     def sync(self):
         if self.config.dags_source:
-            print(f"Synchronizing {self.config.dags_source}")
-            self.utils.copy(src=f"{self.config.dags_source}/*",
-                            dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_DAGS))
+            self.__sync_by_airflow_object_type(self.AIRFLOW_OBJECT_TYPE_DAGS)
         if self.config.hooks_source:
-            print(f"Synchronizing {self.config.hooks_source}")
-            self.utils.copy(src=f"{self.config.hooks_source}/*",
-                            dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_HOOKS))
+            self.__sync_by_airflow_object_type(self.AIRFLOW_OBJECT_TYPE_HOOKS)
         if self.config.operators_source:
-            print(f"Synchronizing {self.config.operators_source}")
-            self.utils.copy(src=f"{self.config.operators_source}/*",
-                            dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_OPERATORS))
+            self.__sync_by_airflow_object_type(self.AIRFLOW_OBJECT_TYPE_OPERATORS)
         if self.config.sensors_source:
-            print(f"Synchronizing {self.config.sensors_source}")
-            self.utils.copy(src=f"{self.config.sensors_source}/*",
-                            dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_SENSORS))
+            self.__sync_by_airflow_object_type(self.AIRFLOW_OBJECT_TYPE_SENSORS)
+    
+    def __sync_by_airflow_object_type(self, airflow_object_type):
+
+        source = None
+
+        if airflow_object_type ==  self.AIRFLOW_OBJECT_TYPE_DAGS:
+            source = self.config.dags_source
+        if airflow_object_type ==  self.AIRFLOW_OBJECT_TYPE_HOOKS:
+            source = self.config.hooks_source
+        if airflow_object_type ==  self.AIRFLOW_OBJECT_TYPE_OPERATORS:
+            source = self.config.operators_source
+        if airflow_object_type ==  self.AIRFLOW_OBJECT_TYPE_SENSORS:
+            source = self.config.sensors_source
+
+        print(f"Synchronizing {source}")
+        all_files_and_folders = sorted(source.glob("**/*"))
+        all_files = [x for x in all_files_and_folders if x.is_file()]
+        # Create all folders
+        all_folders = [x for x in all_files_and_folders if x.is_dir()]
+        for dir in all_folders:
+            src_from_sub_path_parts = Path(str(dir).split(str(source))[1]).parts[1:]
+            dst_path = self.Utils.add_parts_to_path(self.Utils.path_to(airflow_object_type), src_from_sub_path_parts)
+            print(f"Creating folders: {dst_path}")
+            self.utils.create_dir(dst=dst_path)
+
+        for f in all_files:
+            print(f"Creating file: {f}")
+            src_from_sub_path_parts = Path(str(f).split(str(source))[1]).parts[1:]
+            dst_path = self.Utils.add_parts_to_path(self.Utils.path_to(airflow_object_type), src_from_sub_path_parts).parent
+
+            self.utils.copy(src=f,
+                        dst=dst_path)
 
     class Utils:
 
@@ -147,6 +171,10 @@ class AirflowWatchdog:
             for part in parts:
                 p = p / part
             return p
+
+        def create_dir(self, dst):
+            subprocess.call(f"{self.win_powershell_prefix()}mkdir {dst}",
+                            shell=True)
 
         def copy(self, src, dst):
             subprocess.call(f"{self.win_powershell_prefix()}cp {src}",
