@@ -28,12 +28,13 @@ class AirflowWatchdog:
 
     def __init__(self):
         self.config = self.Config()
+        self.utils:self.Utils = self.Utils() 
 
     def start(self):
         if self.config.dags_source:
             name = "DAGs-Watchdog"
-            event_handler = RepoSyncHandler(name,
-                sync_destination=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_DAGS))
+            event_handler = RepoSyncHandler(name, watch_dir=self.config.dags_source,
+                                            sync_destination=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_DAGS))
             self.eventhandlers.append(event_handler)
             observer = Observer()
             observer.setName(name)
@@ -43,8 +44,8 @@ class AirflowWatchdog:
             observer.start()
         if self.config.hooks_source:
             name = "Hooks-Watchdog"
-            event_handler = RepoSyncHandler(name,
-                sync_destination=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_HOOKS))
+            event_handler = RepoSyncHandler(name, watch_dir=self.config.hooks_source,
+                                            sync_destination=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_HOOKS))
             self.eventhandlers.append(event_handler)
             observer = Observer()
             observer.setName(name)
@@ -54,8 +55,8 @@ class AirflowWatchdog:
             observer.start()
         if self.config.operators_source:
             name = "Operators-Watchdog"
-            event_handler = RepoSyncHandler(name,
-                sync_destination=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_OPERATORS))
+            event_handler = RepoSyncHandler(name, watch_dir=self.config.operators_source,
+                                            sync_destination=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_OPERATORS))
             self.eventhandlers.append(event_handler)
             observer = Observer()
             observer.setName(name)
@@ -65,8 +66,8 @@ class AirflowWatchdog:
             observer.start()
         if self.config.sensors_source:
             name = "Sensors-Watchdog"
-            event_handler = RepoSyncHandler(name,
-                sync_destination=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_SENSORS))
+            event_handler = RepoSyncHandler(name, watch_dir=self.config.sensors_source,
+                                            sync_destination=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_SENSORS))
             self.eventhandlers.append(event_handler)
             observer = Observer()
             observer.setName(name)
@@ -80,8 +81,10 @@ class AirflowWatchdog:
             print(
                 f"There are currently {len(self.observers)} Watchdogs active")
             for i in range(len(self.observers)):
+                watch_dir = self.eventhandlers[i].watch_dir
+                sync_dir = self.eventhandlers[i].sync_destination
                 print(
-                    f"[{i}] {self.observers[i].getName()} (isAlive = {self.observers[i].is_alive()})")
+                    f"[{i}] {self.observers[i].getName()} (isAlive = {self.observers[i].is_alive()}): Watching '{watch_dir}' ===syncing===> '{sync_dir}'")
         else:
             print("No Watchdogs active")
 
@@ -95,20 +98,16 @@ class AirflowWatchdog:
     def sync(self):
         if self.config.dags_source:
             print(f"Synchronizing {self.config.dags_source}")
-            subprocess.call(f"{self.Utils.win_powershell_prefix()}cp {self.config.dags_source}/*",
-                            cwd=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_DAGS), shell=True)
+            self.utils.copy(src=f"{self.config.dags_source}/*", dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_DAGS))
         if self.config.hooks_source:
             print(f"Synchronizing {self.config.hooks_source}")
-            subprocess.call(f"{self.Utils.win_powershell_prefix()}cp {self.config.hooks_source}/*",
-                            cwd=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_HOOKS), shell=True)
+            self.utils.copy(src=f"{self.config.hooks_source}/*", dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_HOOKS))
         if self.config.operators_source:
             print(f"Synchronizing {self.config.operators_source}")
-            subprocess.call(f"{self.Utils.win_powershell_prefix()}cp {self.config.operators_source}/*",
-                            cwd=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_OPERATORS), shell=True)
+            self.utils.copy(src=f"{self.config.operators_source}/*", dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_OPERATORS))
         if self.config.sensors_source:
             print(f"Synchronizing {self.config.sensors_source}")
-            subprocess.call(f"{self.Utils.win_powershell_prefix()}cp {self.config.sensors_source}/*",
-                            cwd=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_SENSORS), shell=True)
+            self.utils.copy(src=f"{self.config.sensors_source}/*", dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_SENSORS))
 
     class Utils:
 
@@ -137,6 +136,10 @@ class AirflowWatchdog:
             else:
                 return None
 
+        def copy(self, src, dst):
+            subprocess.call(f"{self.win_powershell_prefix()}cp {src}",
+                            cwd=dst, shell=True)
+
     class Config:
         dags_source: str = ""
         hooks_source: str = ""
@@ -157,21 +160,31 @@ class AirflowWatchdog:
 
 class RepoSyncHandler(FileSystemEventHandler):
 
-    def __init__(self, name, sync_destination):
+    def __init__(self, name, watch_dir, sync_destination):
         self.name = name
+        self.watch_dir = watch_dir
         self.sync_destination = sync_destination
+        self.utils:AirflowWatchdog.Utils = AirflowWatchdog.Utils()
         super().__init__()
 
     def on_created(self, event):
-        print(f"[{self.name}] Created {event.src_path}, I will sync on modification!")
+        print(
+            f"[{self.name}] Created '{event.src_path}', I will sync on modification!")
 
     def on_modified(self, event):
         print(
-            f"[{self.name}] Modified {event.src_path}, syncing to {self.sync_destination} ...")
-        subprocess.call(f"{AirflowWatchdog.Utils.win_powershell_prefix()}cp {event.src_path}",
-                        cwd=self.sync_destination, shell=True)
+            f"[{self.name}] Modified '{event.src_path}', syncing to '{self.sync_destination}' ...")
+        self.utils.copy(src=event.src_path, dst=self.sync_destination)
 
-    # TODO Also implement moving and deletion of files?
+    def on_deleted(self, event):
+        # TODO Implement
+        print(
+            f"[{self.name}] Deleted '{event.src_path}', syncing to '{self.sync_destination}' ...")
+
+    def on_moved(self, event):
+        # TODO Implement
+        print(
+            f"[{self.name}] Moved or Renamed'{event.src_path}' to '{event.dest_path}', syncing to {self.sync_destination} ...")
 
 
 if __name__ == "__main__":
