@@ -48,7 +48,7 @@ If I for example just want to sync my DAGs, it would look like this:
 ### Trigger a sync once
 Execute `python airflow_watchdog.py --sync`
 
-![managepy_watchdog_triggersynconce.png](./images/managepy_watchdog_triggersynconce.png)
+![managepy_watchdog_triggersynconce.png](../../images/managepy_watchdog_triggersynconce.png)
 
 ### Start Watchdog (continuous sync)
 Execute `python airflow_watchdog.py` and receive continuous logs what was detected and done.
