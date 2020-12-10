@@ -3,10 +3,10 @@ A Watchdog that can sync an external repository containing DAGs and Plugins
 with the Airflow instance of airflow-dev-env
 """
 import json
-import subprocess
 import sys
 import os
 import time
+import shutil
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler, FileSystemEventHandler
@@ -128,7 +128,7 @@ class AirflowWatchdog:
         for dir in all_folders:
             src_from_sub_path_parts = Path(str(dir).split(str(source))[1]).parts[1:]
             dst_path = self.Utils.add_parts_to_path(self.Utils.path_to(airflow_object_type), src_from_sub_path_parts)
-            print(f"Creating folders: {dst_path}")
+            print(f"Creating folder: {dst_path}")
             self.utils.create_dir(dst=dst_path)
 
         for f in all_files:
@@ -173,27 +173,34 @@ class AirflowWatchdog:
             return p
 
         def create_dir(self, dst):
-            subprocess.call(f"{self.win_powershell_prefix()}mkdir {dst}",
-                            shell=True)
+            try:
+                os.mkdir(dst)
+            except FileExistsError:
+                print("Folder already existing")
 
-        def copy(self, src, dst):
-            subprocess.call(f"{self.win_powershell_prefix()}cp {src}",
-                            cwd=dst, shell=True)
+        def copy(self, src:Path, dst:Path):
+            try:
+                shutil.copy(src, dst)
+            except IOError as ex:
+                print(f"Unable to copy file. {ex}")
 
-        def remove(self, src, dst):
-            subprocess.call(f"{self.win_powershell_prefix()}rm -r .{src}",
-                            cwd=dst, shell=True)
+        def remove(self, src:Path):
+            try:
+                if src.is_dir():
+                    shutil.rmtree(src)
+                else:
+                    src.unlink()
+            except FileNotFoundError as ex:
+                print(f"Unable to remove file. {ex}")
 
         def move(self, src_dir, src_sub_path_from_parts, src_sub_path_to_parts, dst):
             dst_previous_path = self.add_parts_to_path(dst, src_sub_path_from_parts)
             dst_new_path = self.add_parts_to_path(dst, src_sub_path_to_parts)
             src_new_path = self.add_parts_to_path(src_dir, src_sub_path_to_parts)
-            # If it does not yet exist in dst, copy instead of move
-            if dst_previous_path.exists():
-                subprocess.call(f"{self.win_powershell_prefix()}mv {dst_previous_path} {dst_new_path}",
-                                cwd=dst, shell=True)
-            else:
+            if src_new_path.is_file():
                 self.copy(src=src_new_path, dst=dst_new_path.parent)
+            else:
+                self.create_dir(dst_new_path)
 
     class Config:
         dags_source: Path = None
@@ -238,14 +245,15 @@ class RepoSyncHandler(FileSystemEventHandler):
 
         if not os.path.isdir(event.src_path):
             print(
-                f"[{self.name}] Modified '{event.src_path}', ===syncing===> '{self.sync_destination}' ...")
-            self.utils.copy(src=event.src_path, dst=dst_path)
+                f"[{self.name}] Modified '{src_from_path}', ===syncing===> '{self.sync_destination}' ...")
+            self.utils.copy(src=src_from_path, dst=dst_path)
 
     def on_deleted(self, event):
-        src_sub_path = Path(str(event.src_path).split(str(self.watch_dir))[1])
+        src_sub_path_parts = Path(str(event.src_path).split(str(self.watch_dir))[1]).parts[1:]
         print(
             f"[{self.name}] Deleted '{event.src_path}', ===syncing===> '{self.sync_destination}' ...")
-        self.utils.remove(src=src_sub_path, dst=self.sync_destination)
+        # self.utils.remove(src=src_sub_path, dst=self.sync_destination)
+        self.utils.remove(AirflowWatchdog.Utils.add_parts_to_path(self.sync_destination, src_sub_path_parts))
 
     def on_moved(self, event):
         src_from_path = Path(event.src_path)
@@ -257,7 +265,6 @@ class RepoSyncHandler(FileSystemEventHandler):
             f"[{self.name}] Moved or Renamed '{event.src_path}' to '{event.dest_path}', ===syncing===> {self.sync_destination} ...")
         self.utils.move(src_dir=self.watch_dir, src_sub_path_from_parts=src_from_sub_path_parts,
                         src_sub_path_to_parts=src_to_sub_path_parts, dst=self.sync_destination)
-
 
 if __name__ == "__main__":
     print(banner)
