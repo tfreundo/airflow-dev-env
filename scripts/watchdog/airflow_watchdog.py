@@ -5,7 +5,9 @@ with the Airflow instance of airflow-dev-env
 import json
 import subprocess
 import sys
+import os
 import time
+from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler, FileSystemEventHandler
 
@@ -28,7 +30,7 @@ class AirflowWatchdog:
 
     def __init__(self):
         self.config = self.Config()
-        self.utils:self.Utils = self.Utils() 
+        self.utils: self.Utils = self.Utils()
 
     def start(self):
         if self.config.dags_source:
@@ -98,16 +100,20 @@ class AirflowWatchdog:
     def sync(self):
         if self.config.dags_source:
             print(f"Synchronizing {self.config.dags_source}")
-            self.utils.copy(src=f"{self.config.dags_source}/*", dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_DAGS))
+            self.utils.copy(src=f"{self.config.dags_source}/*",
+                            dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_DAGS))
         if self.config.hooks_source:
             print(f"Synchronizing {self.config.hooks_source}")
-            self.utils.copy(src=f"{self.config.hooks_source}/*", dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_HOOKS))
+            self.utils.copy(src=f"{self.config.hooks_source}/*",
+                            dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_HOOKS))
         if self.config.operators_source:
             print(f"Synchronizing {self.config.operators_source}")
-            self.utils.copy(src=f"{self.config.operators_source}/*", dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_OPERATORS))
+            self.utils.copy(src=f"{self.config.operators_source}/*",
+                            dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_OPERATORS))
         if self.config.sensors_source:
             print(f"Synchronizing {self.config.sensors_source}")
-            self.utils.copy(src=f"{self.config.sensors_source}/*", dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_SENSORS))
+            self.utils.copy(src=f"{self.config.sensors_source}/*",
+                            dst=self.Utils.path_to(self.AIRFLOW_OBJECT_TYPE_SENSORS))
 
     class Utils:
 
@@ -126,15 +132,22 @@ class AirflowWatchdog:
             """Returns the path to the airflow_object_type (DAGs, Plugins)
             """
             if airflow_object_type == AirflowWatchdog.AIRFLOW_OBJECT_TYPE_DAGS:
-                return "../../airflow/dags"
+                return (Path.cwd() / "../../airflow/dags").resolve()
             elif airflow_object_type == AirflowWatchdog.AIRFLOW_OBJECT_TYPE_HOOKS:
-                return "../../airflow/plugins/hooks"
+                return (Path.cwd() / "../../airflow/plugins/hooks").resolve()
             elif airflow_object_type == AirflowWatchdog.AIRFLOW_OBJECT_TYPE_OPERATORS:
-                return "../../airflow/plugins/operators"
+                return (Path.cwd() / "../../airflow/plugins/operators").resolve()
             elif airflow_object_type == AirflowWatchdog.AIRFLOW_OBJECT_TYPE_SENSORS:
-                return "../../airflow/plugins/sensors"
+                return (Path.cwd() / "../../airflow/plugins/sensors").resolve()
             else:
                 return None
+
+        @staticmethod
+        def add_parts_to_path(path, parts):
+            p = Path(path)
+            for part in parts:
+                p = p / part
+            return p
 
         def copy(self, src, dst):
             subprocess.call(f"{self.win_powershell_prefix()}cp -r {src}",
@@ -144,11 +157,22 @@ class AirflowWatchdog:
             subprocess.call(f"{self.win_powershell_prefix()}rm -r .{src}",
                             cwd=dst, shell=True)
 
+        def move(self, src_dir, src_sub_path_from_parts, src_sub_path_to_parts, dst):
+            dst_previous_path = self.add_parts_to_path(dst, src_sub_path_from_parts)
+            dst_new_path = self.add_parts_to_path(dst, src_sub_path_to_parts)
+            src_new_path = self.add_parts_to_path(src_dir, src_sub_path_to_parts)
+            # If it does not yet exist in dst, copy instead of move
+            if dst_previous_path.exists():
+                subprocess.call(f"{self.win_powershell_prefix()}mv {dst_previous_path} {dst_new_path}",
+                                cwd=dst, shell=True)
+            else:
+                self.copy(src=src_new_path, dst=dst_new_path.parent)
+
     class Config:
-        dags_source: str = ""
-        hooks_source: str = ""
-        operators_source: str = ""
-        sensors_source: str = ""
+        dags_source: Path = None
+        hooks_source: Path = None
+        operators_source: Path = None
+        sensors_source: Path = None
 
         def __init__(self):
             self.__load()
@@ -156,40 +180,52 @@ class AirflowWatchdog:
         def __load(self):
             with open("watchdog_config.json") as f:
                 config = json.load(f)
-                self.dags_source = config["dags_source"]
-                self.hooks_source = config["hooks_source"]
-                self.operators_source = config["operators_source"]
-                self.sensors_source = config["sensors_source"]
+                if config["dags_source"]:
+                    self.dags_source = Path(config["dags_source"])
+                if config["hooks_source"]:
+                    self.hooks_source = Path(config["hooks_source"])
+                if config["operators_source"]:
+                    self.operators_source = Path(config["operators_source"])
+                if config["sensors_source"]:
+                    self.sensors_source = Path(config["sensors_source"])
 
 
 class RepoSyncHandler(FileSystemEventHandler):
 
-    def __init__(self, name, watch_dir, sync_destination):
+    def __init__(self, name, watch_dir:Path, sync_destination:Path):
         self.name = name
         self.watch_dir = watch_dir
         self.sync_destination = sync_destination
-        self.utils:AirflowWatchdog.Utils = AirflowWatchdog.Utils()
+        self.utils: AirflowWatchdog.Utils = AirflowWatchdog.Utils()
         super().__init__()
 
     def on_created(self, event):
         print(
-            f"[{self.name}] Created '{event.src_path}', I will sync on modification!")
+            f"[{self.name}] Created '{event.src_path}', syncing after Modification ...")
 
     def on_modified(self, event):
-        print(
-            f"[{self.name}] Modified '{event.src_path}', syncing to '{self.sync_destination}' ...")
-        self.utils.copy(src=event.src_path, dst=self.sync_destination)
+        # If it's a folder, just skip as we sync the files located unter that folder
+        if not os.path.isdir(event.src_path):
+            print(
+                f"[{self.name}] Modified '{event.src_path}', syncing to '{self.sync_destination}' ...")
+            self.utils.copy(src=event.src_path, dst=self.sync_destination)
 
     def on_deleted(self, event):
-        src_sub_path = event.src_path.split(self.watch_dir)[1]
+        src_sub_path = Path(str(event.src_path).split(str(self.watch_dir))[1])
         print(
             f"[{self.name}] Deleted '{event.src_path}', syncing to '{self.sync_destination}' ...")
         self.utils.remove(src=src_sub_path, dst=self.sync_destination)
 
     def on_moved(self, event):
-        # TODO Implement copy + delete
+        src_from_path = Path(event.src_path)
+        src_to_path = Path(event.dest_path)
+        # Path Parts without root dir as this is just sub paths!
+        src_from_sub_path_parts = Path(str(src_from_path).split(str(self.watch_dir))[1]).parts[1:]
+        src_to_sub_path_parts = Path(str(event.dest_path).split(str(self.watch_dir))[1]).parts[1:]
         print(
-            f"[{self.name}] Moved or Renamed'{event.src_path}' to '{event.dest_path}', syncing to {self.sync_destination} ...")
+            f"[{self.name}] Moved or Renamed '{event.src_path}' to '{event.dest_path}', syncing to {self.sync_destination} ...")
+        self.utils.move(src_dir=self.watch_dir, src_sub_path_from_parts=src_from_sub_path_parts,
+                        src_sub_path_to_parts=src_to_sub_path_parts, dst=self.sync_destination)
 
 
 if __name__ == "__main__":
