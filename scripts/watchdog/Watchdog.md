@@ -51,6 +51,7 @@ Execute `python airflow_watchdog.py --sync`
 ![managepy_watchdog_triggersynconce.png](../../images/managepy_watchdog_triggersynconce.png)
 
 ### Start Watchdog (continuous sync)
-Execute `python airflow_watchdog.py` and receive continuous logs what was detected and done.
-<!-- TODO Show Watchdog -->
-<!-- Do you need to trigger once manually before "watching" works? Or does it work folder-wide? -->
+Execute `python airflow_watchdog.py` and continuously sync your configured folders.
+
+![managepy_watchdog_triggersynconce.png](../../images/managepy_watchdog_continuoussync.png)
+
