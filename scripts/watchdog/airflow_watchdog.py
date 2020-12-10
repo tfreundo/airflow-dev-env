@@ -137,7 +137,11 @@ class AirflowWatchdog:
                 return None
 
         def copy(self, src, dst):
-            subprocess.call(f"{self.win_powershell_prefix()}cp {src}",
+            subprocess.call(f"{self.win_powershell_prefix()}cp -r {src}",
+                            cwd=dst, shell=True)
+
+        def remove(self, src, dst):
+            subprocess.call(f"{self.win_powershell_prefix()}rm -r .{src}",
                             cwd=dst, shell=True)
 
     class Config:
@@ -177,12 +181,13 @@ class RepoSyncHandler(FileSystemEventHandler):
         self.utils.copy(src=event.src_path, dst=self.sync_destination)
 
     def on_deleted(self, event):
-        # TODO Implement
+        src_sub_path = event.src_path.split(self.watch_dir)[1]
         print(
             f"[{self.name}] Deleted '{event.src_path}', syncing to '{self.sync_destination}' ...")
+        self.utils.remove(src=src_sub_path, dst=self.sync_destination)
 
     def on_moved(self, event):
-        # TODO Implement
+        # TODO Implement copy + delete
         print(
             f"[{self.name}] Moved or Renamed'{event.src_path}' to '{event.dest_path}', syncing to {self.sync_destination} ...")
 
