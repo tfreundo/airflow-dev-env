@@ -117,7 +117,6 @@ class AirflowWatchdog:
 
     class Utils:
 
-        # TODO Move all the subprocess calls into Utils
         @staticmethod
         def win_powershell_prefix():
             """Checks if the system runs on Windows and returns a powershell as prefix if so
@@ -150,7 +149,7 @@ class AirflowWatchdog:
             return p
 
         def copy(self, src, dst):
-            subprocess.call(f"{self.win_powershell_prefix()}cp -r {src}",
+            subprocess.call(f"{self.win_powershell_prefix()}cp {src}",
                             cwd=dst, shell=True)
 
         def remove(self, src, dst):
@@ -204,16 +203,20 @@ class RepoSyncHandler(FileSystemEventHandler):
             f"[{self.name}] Created '{event.src_path}', syncing after Modification ...")
 
     def on_modified(self, event):
-        # If it's a folder, just skip as we sync the files located unter that folder
+        # If it's a folder, just skip as we sync just the files located unter that folder
+        src_from_path = Path(event.src_path)
+        src_from_sub_path_parts = Path(str(src_from_path).split(str(self.watch_dir))[1]).parts[1:]
+        dst_path = AirflowWatchdog.Utils.add_parts_to_path(self.sync_destination, src_from_sub_path_parts).parent
+
         if not os.path.isdir(event.src_path):
             print(
-                f"[{self.name}] Modified '{event.src_path}', syncing to '{self.sync_destination}' ...")
-            self.utils.copy(src=event.src_path, dst=self.sync_destination)
+                f"[{self.name}] Modified '{event.src_path}', ===syncing===> '{self.sync_destination}' ...")
+            self.utils.copy(src=event.src_path, dst=dst_path)
 
     def on_deleted(self, event):
         src_sub_path = Path(str(event.src_path).split(str(self.watch_dir))[1])
         print(
-            f"[{self.name}] Deleted '{event.src_path}', syncing to '{self.sync_destination}' ...")
+            f"[{self.name}] Deleted '{event.src_path}', ===syncing===> '{self.sync_destination}' ...")
         self.utils.remove(src=src_sub_path, dst=self.sync_destination)
 
     def on_moved(self, event):
@@ -223,7 +226,7 @@ class RepoSyncHandler(FileSystemEventHandler):
         src_from_sub_path_parts = Path(str(src_from_path).split(str(self.watch_dir))[1]).parts[1:]
         src_to_sub_path_parts = Path(str(event.dest_path).split(str(self.watch_dir))[1]).parts[1:]
         print(
-            f"[{self.name}] Moved or Renamed '{event.src_path}' to '{event.dest_path}', syncing to {self.sync_destination} ...")
+            f"[{self.name}] Moved or Renamed '{event.src_path}' to '{event.dest_path}', ===syncing===> {self.sync_destination} ...")
         self.utils.move(src_dir=self.watch_dir, src_sub_path_from_parts=src_from_sub_path_parts,
                         src_sub_path_to_parts=src_to_sub_path_parts, dst=self.sync_destination)
 
