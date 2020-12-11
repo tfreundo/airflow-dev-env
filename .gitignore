@@ -3,4 +3,3 @@
 __pycache__
 /airflow/logs/*
 airflow-dev-env-extensions
-watchdog_config_unittests.json

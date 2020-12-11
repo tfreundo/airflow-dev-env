@@ -4,13 +4,13 @@ from . import test_watchdog_utils
 from scripts.airflow_watchdog.airflow_watchdog import AirflowWatchdog
 import subprocess
 
-class TestWatchdogSyncOnce(unittest.TestCase):
+class TestWatchdogSync(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         """ Set up test environment (once for all tests)
         """
-        super(TestWatchdogSyncOnce, cls).setUpClass()
+        super(TestWatchdogSync, cls).setUpClass()
 
         test_watchdog_utils.TestWatchdogUtils.update_watchdog_config_for_unittests()
         test_watchdog_utils.TestWatchdogUtils.create_test_file_and_folder_structure()
@@ -22,16 +22,10 @@ class TestWatchdogSyncOnce(unittest.TestCase):
     def tearDownClass(cls):
         """ Clean the test environment (once after all tests)
         """
-        super(TestWatchdogSyncOnce, cls).tearDownClass()
-        # TODO Reactivate after testing
-        # test_watchdog_utils.TestWatchdogUtils.remove_test_file_and_folder_structure()
-        # TODO Remove the files created in airflow folder
-        # TODO Remove created config file
+        super(TestWatchdogSync, cls).tearDownClass()
+        test_watchdog_utils.TestWatchdogUtils.remove_test_files_and_folders_structure()
 
-    def test_upper(self):
-        self.assertEqual('foo'.upper(), 'FOO')
-
-    def test_files_and_contents_were_created(self):
+    def test_files_and_contents_were_synced(self):
         """Tests that all files were synced and contain the expected content
         """
         for (filename, expected_content) in test_watchdog_utils.TestWatchdogUtils.test_files_and_contents:

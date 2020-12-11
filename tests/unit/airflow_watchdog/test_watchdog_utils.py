@@ -13,6 +13,13 @@ class TestWatchdogUtils:
     test_folder_operators = test_folder_root / "plugins/operators/nested"
     test_folder_sensors = test_folder_root / "plugins/sensors/nested"
 
+    test_folders = [
+        test_folder_dags,
+        test_folder_hooks,
+        test_folder_operators,
+        test_folder_sensors
+    ]
+
     # Test files
     test_file_dag_1 = test_folder_dags / "../my_test_dag.py"
     test_file_dag_1_initial_content = "print('I am a DAG!')"
@@ -95,8 +102,18 @@ class TestWatchdogUtils:
             TestWatchdogUtils.test_file_sensor_2, TestWatchdogUtils.test_file_sensor_2_initial_content)
 
     @staticmethod
-    def remove_test_file_and_folder_structure():
+    def remove_test_files_and_folders_structure():
+        """Removes the local test temp folder, all synced files and folders during tests and
+        the created watchdog_config file
+        """ 
         TestWatchdogUtils.__remove(TestWatchdogUtils.test_folder_root)
+        for (filename, content) in TestWatchdogUtils.test_files_and_contents:
+            dst_file:Path = TestWatchdogUtils.get_sync_destination_path(filename) / filename.name
+            TestWatchdogUtils.__remove(dst_file)
+        for folder in TestWatchdogUtils.test_folders:
+            dst_file:Path = TestWatchdogUtils.get_sync_destination_path(folder) / folder.name
+            TestWatchdogUtils.__remove(dst_file)
+        TestWatchdogUtils.__remove(TestWatchdogUtils.WATCHDOG_CONFIG_FILEPATH)
 
     @staticmethod
     def update_watchdog_config_for_unittests():
