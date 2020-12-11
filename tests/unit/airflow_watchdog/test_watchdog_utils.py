@@ -7,7 +7,7 @@ from scripts.airflow_watchdog.airflow_watchdog import AirflowWatchdog
 class TestWatchdogUtils:
 
     # Test folders
-    test_folder_root = Path().cwd() / "tests/integration/airflow_watchdog/tmp_test"
+    test_folder_root = Path().cwd() / "tests/unit/airflow_watchdog/tmp_test"
     test_folder_dags = test_folder_root / "dags/nested"
     test_folder_hooks = test_folder_root / "plugins/hooks/nested"
     test_folder_operators = test_folder_root / "plugins/operators/nested"
@@ -45,7 +45,7 @@ class TestWatchdogUtils:
         (test_file_sensor_2, test_file_sensor_2_initial_content)
     ]
 
-    WATCHDOG_CONFIG_FILEPATH = Path().cwd() / "tests/integration/airflow_watchdog/watchdog_config_unittests.json"
+    WATCHDOG_CONFIG_FILEPATH = Path().cwd() / "tests/unit/airflow_watchdog/watchdog_config_unittests.json"
 
     @staticmethod
     def __create_dir(dirname):
