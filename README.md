@@ -23,7 +23,7 @@ Your airflow instance is mounting the folders `airflow/dags` and `airflow/plugin
 ## Manage your airflow-dev-env
 ![managepy.png](./images/managepy.png)
 
-The [Manage CLI](./scripts/cli/manage.py) is your little helper to maximize the convenience when developing and integrating things with the airflow-dev-env.
+The [Manage CLI](./scripts/cli/manage_cli.py) is your little helper to maximize the convenience when developing and integrating things with the airflow-dev-env.
 It let's you:
 * Add & start airflow-dev-env Extensions (like MongoDB)
 * Add & manage Airflow Extra Packages
@@ -35,10 +35,10 @@ It let's you:
 
 ### Adding Airflow Extra Packages
 To install [Airflow Extra Packages](http://apache-airflow-docs.s3-website.eu-central-1.amazonaws.com/docs/apache-airflow/latest/extra-packages-ref.html) you can:
-* Use the [Manage CLI](./scripts/cli/manage.py)
+* Use the [Manage CLI](./scripts/cli/manage_cli.py)
 * Add the packages directly in the [Airflow Dockerfile](./docker/airflow/Dockerfile)
 
-The [Manage CLI](./scripts/cli/manage.py) has a list of checkboxes, with all available [Airflow Extra Packages](https://airflow.apache.org/docs/apache-airflow/stable/installation.html#extra-packages). You can simple check them, and they will be correctly written into your [Airflow Dockerfile](./docker/airflow/Dockerfile).
+The [Manage CLI](./scripts/cli/manage_cli.py) has a list of checkboxes, with all available [Airflow Extra Packages](https://airflow.apache.org/docs/apache-airflow/stable/installation.html#extra-packages). You can simple check them, and they will be correctly written into your [Airflow Dockerfile](./docker/airflow/Dockerfile).
 
 ![managepy_airflow_extrapackages.png](./images/managepy_airflow_extrapackages.png)
 
@@ -48,7 +48,7 @@ For convenience, there are additional extensions that you can integrate into thi
 Available extensions:
 * [MongoDB Extensions](https://github.com/tfreundo/airflow-dev-env-mongodb)
 
-You can add this extension easily via the [Manage CLI](./scripts/cli/manage.py).
+You can add this extension easily via the [Manage CLI](./scripts/cli/manage_cli.py).
 
 These extensions are intentionally not included as git submodules to keep this development environment as clean as possible.
 If you don't need these extensions, they won't show up!

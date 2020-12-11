@@ -103,9 +103,7 @@ def write_extrapackages(packages):
 
 
 def manage_extrapackages():
-    # 'checked': True --> Implement function that checks if something should be checked or not!
-
-    # TODO Read current setting
+    # Read current setting
     active_pkgs = get_checked_extrapackages()
     print(f"Already selected Airflow extra packages: {active_pkgs}")
 
@@ -399,7 +397,6 @@ def manage_extrapackages():
     print("### HINT ###")
     print("Rebuild the Airflow Docker Container!")
 
-
 def main():
     print(banner)
 
@@ -419,7 +416,6 @@ def main():
         main()
     elif main_menu_answer == CHOICE_MAINMENU_EXIT:
         sys.exit()
-
 
 if __name__ == "__main__":
     main()
