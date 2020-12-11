@@ -118,7 +118,6 @@ class TestWatchdogUtils:
     @staticmethod
     def update_watchdog_config_for_unittests():
         with open(TestWatchdogUtils.WATCHDOG_CONFIG_FILEPATH, "w") as f:
-            # TODO Update config
             config_data = {
                 "dags_source": str(TestWatchdogUtils.test_folder_root / "dags"),
                 "hooks_source": str(TestWatchdogUtils.test_folder_root / "plugins/hooks"),

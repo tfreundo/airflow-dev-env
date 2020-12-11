@@ -15,8 +15,8 @@ class TestWatchdogSync(unittest.TestCase):
         test_watchdog_utils.TestWatchdogUtils.update_watchdog_config_for_unittests()
         test_watchdog_utils.TestWatchdogUtils.create_test_file_and_folder_structure()
         # Exceute syncing once here and just test the result afterwards
-        w = AirflowWatchdog(test_watchdog_utils.TestWatchdogUtils.WATCHDOG_CONFIG_FILEPATH)
-        w.sync()
+        cls.sut = AirflowWatchdog(test_watchdog_utils.TestWatchdogUtils.WATCHDOG_CONFIG_FILEPATH)
+        cls.sut.sync()
 
     @classmethod
     def tearDownClass(cls):

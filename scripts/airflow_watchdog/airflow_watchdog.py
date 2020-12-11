@@ -266,8 +266,6 @@ class RepoSyncHandler(FileSystemEventHandler):
 if __name__ == "__main__":
     print(banner)
 
-    # TODO Check that the script was either exectued from project root or from this folder (else paths are wrong!)
-
     config_file_path = "watchdog_config.json"
     w = None
     run_continuous = True
