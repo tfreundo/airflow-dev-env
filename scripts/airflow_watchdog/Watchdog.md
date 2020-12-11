@@ -1,14 +1,14 @@
 # External Repo Watchdog
 The external repo Watchdog is useful, if you want to **develop and push your DAGs and Plugins** (Hooks, Operators and Sensors) not in this repository but in **your own, private or enterprise repository (cloned on your local machine)**.
 
-You can run your own Watchdog using the [airflow_watchdog.py](scripts/cli/airflow_watchdog.py).
+You can run your own Watchdog using the [airflow_watchdog.py](scripts/airflow_watchdog/airflow_watchdog.py).
 
 It will:
 * Copy your DAGs and Plugins once if you add `--sync` like `python airflow_watchdog.py --sync`
 * Sync your DAGs and Plugins continuously when just running `python airflow_watchdog.py`. Using this you can develop on your external repo (cloned on your local machine) and on every save there, it will be synced to this repository and will directly be available in your Airflow running in the `airflow-dev-env`. If that's not convenient ... ;)
 
 ## How to configure it
-Simply open the [watchdog_config.json](scripts/cli/watchdog_config.json) and enter the **paths to your DAGs and Plugins** of your external repo (cloned on your local machine) or **leave it as an empty string if you don't want to sync**.
+Simply open the [watchdog_config.json](scripts/airflow_watchdog/watchdog_config.json) and enter the **paths to your DAGs and Plugins** of your external repo (cloned on your local machine) or **leave it as an empty string if you don't want to sync**.
 
 ## First run
 If it's you're first run, it makes sense to run `python airflow_watchdog.py --sync` once. This makes sure, that the `airflow-dev-env/airflow` folder is already in sync with your external repository.
