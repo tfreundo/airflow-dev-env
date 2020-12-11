@@ -28,8 +28,8 @@ class AirflowWatchdog:
     eventhandlers = []
     observers = []
 
-    def __init__(self):
-        self.config = self.Config()
+    def __init__(self, config_file_path):
+        self.config = self.Config(config_file_path)
         self.utils: self.Utils = self.Utils()
 
     def start(self):
@@ -208,11 +208,12 @@ class AirflowWatchdog:
         operators_source: Path = None
         sensors_source: Path = None
 
-        def __init__(self):
+        def __init__(self, config_file_path):
+            self.config_file_path = config_file_path
             self.__load()
 
         def __load(self):
-            with open("watchdog_config.json") as f:
+            with open(self.config_file_path) as f:
                 config = json.load(f)
                 if config["dags_source"]:
                     self.dags_source = Path(config["dags_source"])
@@ -268,12 +269,23 @@ class RepoSyncHandler(FileSystemEventHandler):
 
 if __name__ == "__main__":
     print(banner)
-    w = AirflowWatchdog()
+
+    config_file_path = "watchdog_config.json"
+    w = None
+    run_continuous = True
 
     if len(sys.argv) > 1:
-        if sys.argv[1] == "--sync":
+        if "--config" in sys.argv:
+            i = sys.argv.index("--config")
+            config_file_path = sys.argv[i+1]
+            print(f"Using custom config file '{config_file_path}'")
+        if "--sync" in sys.argv:
+            run_continuous = False
+            w = AirflowWatchdog(config_file_path)
             w.sync()
-    else:
+    
+    if run_continuous:
+        w = AirflowWatchdog(config_file_path)
         w.start()
         w.status()
 
