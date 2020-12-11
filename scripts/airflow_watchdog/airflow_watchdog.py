@@ -142,26 +142,25 @@ class AirflowWatchdog:
     class Utils:
 
         @staticmethod
-        def win_powershell_prefix():
-            """Checks if the system runs on Windows and returns a powershell as prefix if so
-            """
-            if sys.platform == "win32":
-                return "powershell "
-            else:
-                return ""
-
-        @staticmethod
         def path_to(airflow_object_type):
             """Returns the path to the airflow_object_type (DAGs, Plugins)
             """
+            root = Path.cwd()
+            sub_path = ""
+            # Started from project root (e.g. by unittest)
+            if root.name == "airflow-dev-env":
+                sub_path = "airflow"
+            # Assuming that it was started from the same dir as this script
+            else:
+                sub_path = "../../airflow"
             if airflow_object_type == AirflowWatchdog.AIRFLOW_OBJECT_TYPE_DAGS:
-                return (Path.cwd() / "../../airflow/dags").resolve()
+                return (Path.cwd() / sub_path / "dags").resolve()
             elif airflow_object_type == AirflowWatchdog.AIRFLOW_OBJECT_TYPE_HOOKS:
-                return (Path.cwd() / "../../airflow/plugins/hooks").resolve()
+                return (Path.cwd() / sub_path / "plugins/hooks").resolve()
             elif airflow_object_type == AirflowWatchdog.AIRFLOW_OBJECT_TYPE_OPERATORS:
-                return (Path.cwd() / "../../airflow/plugins/operators").resolve()
+                return (Path.cwd() / sub_path / "plugins/operators").resolve()
             elif airflow_object_type == AirflowWatchdog.AIRFLOW_OBJECT_TYPE_SENSORS:
-                return (Path.cwd() / "../../airflow/plugins/sensors").resolve()
+                return (Path.cwd() / sub_path / "plugins/sensors").resolve()
             else:
                 return None
 
@@ -173,10 +172,7 @@ class AirflowWatchdog:
             return p
 
         def create_dir(self, dst):
-            try:
-                os.mkdir(dst)
-            except FileExistsError:
-                print("Folder already existing")
+            Path(dst).mkdir(parents=True, exist_ok=True)
 
         def copy(self, src:Path, dst:Path):
             try:
@@ -269,6 +265,8 @@ class RepoSyncHandler(FileSystemEventHandler):
 
 if __name__ == "__main__":
     print(banner)
+
+    # TODO Check that the script was either exectued from project root or from this folder (else paths are wrong!)
 
     config_file_path = "watchdog_config.json"
     w = None
