@@ -18,7 +18,7 @@ Simply run `docker-compose up -d` and you're up and running.
 If everything worked, your Airflow should be ready under `http://localhost:8080/`. You can further evaluate that everything works as expected, by executing the `example_dag`.
 
 ## Usage
-For the developer documentation have a look at the [Wiki](https://github.com/tfreundo/airflow-dev-env/wiki)
+For the developer documentation have a look at the [Wiki](https://github.com/tfreundo/airflow-dev-env/wiki).
 
 ## Adding your own DAGs and Plugins (move to wiki)
 Your airflow instance is mounting the folders `airflow/dags` and `airflow/plugins` for you. So you can develop your scripts locally, and the Airflow docker container will pick them up and they are ready to use.
