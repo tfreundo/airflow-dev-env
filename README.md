@@ -13,6 +13,8 @@ Your extensible development environment for data projects with [Apache Airflow](
 * Having a local environment that is way closer to an actual production deployment
 * Great development experience as DAGs and Plugins are directly mounted to the Airflow Docker Container. Develop on the host with your preferred IDE and directly see the results in your Docker environment
 
+![airflow-dev-env-overview-v1.0.png](https://raw.githubusercontent.com/tfreundo/airflow-dev-env/feature/improve-docs/images/airflow-dev-env-overview-v1.0.png)
+
 ## Installation
 Simply run `docker-compose up -d` and you're up and running.
 If everything worked, your Airflow should be ready under `http://localhost:8080/`. You can further evaluate that everything works as expected, by executing the `example_dag`.
